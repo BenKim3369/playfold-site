@@ -3,11 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
   <meta name="theme-color" content="#f6f3e9">
   <title>Seoul Rent Escape | PLAYFOLD</title>
-  <meta name="description" content="Start in a tiny Seoul room, grow your side hustles, and save for a home of your own. An idle clicker for iPhone, available in English and Korean.">
+  <meta name="description" content="Out of work in Seoul. Rent doesn’t take a break. Start in a tiny room, build side hustles, and save for a home in this Korean idle life game.">
   <meta property="og:title" content="Seoul Rent Escape | PLAYFOLD">
-  <meta property="og:description" content="A tiny room in Seoul. $30 in the bank. Tap for side hustles and work toward a home of your own.">
+  <meta property="og:description" content="Out of work in Seoul. Rent doesn’t take a break. A young Korean, a tiny rented room, and $30 to start again.">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="en_US">
   <meta property="og:image" content="https://play-fold.net/wolse-escape/en/assets/1-goshiwon-usd.jpg">
@@ -76,6 +77,9 @@
     h3 { font-size: 1.35rem; line-height: 1.25; margin: 0 0 10px; }
     .feature p { color: var(--muted); font-size: 1rem; margin: 0; }
     .game-note { margin: 28px 0 0; color: var(--muted); font-size: .875rem; }
+    .start { border-top: 1px solid var(--ink); padding-block: 36px 48px; }
+    .start h2 { margin-bottom: 12px; }
+    .start p { color: var(--muted); margin: 0; }
     .foot { border-top: 1px solid var(--line); padding-block: 20px 32px; color: var(--muted); font-size: .875rem; }
     @media (max-width: 900px) {
       .hero { gap: 32px; }
@@ -96,6 +100,7 @@
       .foot { flex-wrap: wrap; }
     }
   </style>
+  <script src="metrics.js" defer></script>
 </head>
 <body>
   <header class="wrap mast">
@@ -108,11 +113,11 @@
         <p class="chart-rank"><strong>#1 Paid iPhone App in Korea</strong><a href="https://itunes.apple.com/kr/rss/toppaidapplications/limit=100/json">App Store paid chart · 27 Nov 2026</a></p>
         <p class="genre">An idle clicker for iPhone</p>
         <h1 id="game-title">Seoul<br>Rent Escape</h1>
-        <p class="lead">A tiny room. A home of your own.</p>
-        <p class="description">Start in a windowless room in Seoul with $30 in the bank. Tap for side hustles, keep up with the rent, and save for your next move.</p>
+        <p class="lead">Out of work in Seoul.<br>Rent doesn’t take a break.</p>
+        <p class="description">Play as a young Korean taking a break from working life. Start in a windowless goshiwon with $30 in the bank. Tap for side hustles, cover the rent, and build a way forward, one room at a time.</p>
         <div class="stores" aria-label="Choose your App Store">
-          <a class="store" href="https://apps.apple.com/us/app/seoul-rent-escape/id6832831433">US App Store · $0.29</a>
-          <a class="store secondary" href="https://apps.apple.com/gb/app/seoul-rent-escape/id6832831433">UK App Store · £0.29</a>
+          <a class="store" data-store-cta="hero_us" href="https://apps.apple.com/us/app/seoul-rent-escape/id6832831433">US App Store · $0.29</a>
+          <a class="store secondary" data-store-cta="hero_gb" href="https://apps.apple.com/gb/app/seoul-rent-escape/id6832831433">UK App Store · £0.29</a>
         </div>
         <p class="price-date">Store prices checked on 27 November 2026. Final price shown in the App Store.</p>
       </div>
@@ -135,7 +140,15 @@
       </div>
       <p class="game-note">Play in English or Korean. In-game money is shown in dollars ($) in English and won (₩) in Korean. Images show actual English gameplay.</p>
     </section>
+    <section class="start" aria-labelledby="start-title">
+      <h2 id="start-title">A new start, one rent payment at a time.</h2>
+      <p>Begin in a tiny Seoul room. See how far your side hustles can take you.</p>
+      <div class="stores" aria-label="Choose your App Store">
+        <a class="store" data-store-cta="bottom_us" href="https://apps.apple.com/us/app/seoul-rent-escape/id6832831433">US App Store · $0.29</a>
+        <a class="store secondary" data-store-cta="bottom_gb" href="https://apps.apple.com/gb/app/seoul-rent-escape/id6832831433">UK App Store · £0.29</a>
+      </div>
+    </section>
   </main>
-  <footer class="wrap foot"><span>© 2026 PLAYFOLD</span><a href="https://play-fold.net/privacy.html">Game privacy policy</a></footer>
+  <footer class="wrap foot"><span>© 2026 PLAYFOLD</span><a href="privacy.html">Website privacy</a><a href="https://play-fold.net/privacy.html">Game privacy policy</a></footer>
 </body>
 </html>

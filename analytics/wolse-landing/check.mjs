@@ -1,0 +1,51 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {randomUUID,webcrypto} from 'node:crypto';
+import vm from 'node:vm';
+const base=process.env.METRICS_TEST_ENDPOINT || 'http://localhost:8796';
+const token=process.env.METRICS_TEST_TOKEN || 'local-test-not-production';
+const headers={Origin:'https://play-fold.net','Content-Type':'text/plain'};
+const report=async qa=>{const r=await fetch(base+'/report?qa='+Number(qa),{headers:{Authorization:`Bearer ${token}`}});assert.equal(r.status,200);return r.json()};
+const post=async(body,extra={})=>fetch(base+'/collect',{method:'POST',headers:{...headers,...extra},body:typeof body==='string'?body:JSON.stringify(body)});
+const before=await report(true), prodBefore=await report(false);
+const input={v:1,page:randomUUID(),source:'instagram_paid_rank_v3',event:'visit',qa:true};
+assert.equal((await post(input)).status,204);
+assert.equal((await post(input)).status,204);
+assert.equal((await post({...input,event:'store_click',cta:'hero_us'})).status,204);
+assert.equal((await post({...input,event:'store_click',cta:'hero_us'})).status,204);
+assert.equal((await post({...input,event:'store_click',cta:'bottom_gb'})).status,204);
+assert.equal((await post({...input,page:randomUUID(),event:'store_click',cta:'bottom_us'})).status,204);
+assert.equal((await post({...input,page:randomUUID()})).status,204);
+const after=await report(true), prodAfter=await report(false);
+assert.equal(after.totals.visits-before.totals.visits,3);
+assert.equal(after.totals.click_through_rate,after.totals.clicked_visits/after.totals.visits);
+assert.equal(after.totals.clicked_visits-before.totals.clicked_visits,2);
+assert.equal(after.totals.hero_us-before.totals.hero_us,1);
+assert.equal(after.totals.bottom_gb-before.totals.bottom_gb,1);
+assert.equal(after.totals.bottom_us-before.totals.bottom_us,1);
+assert.deepEqual(prodAfter.totals,prodBefore.totals);
+assert.equal((await fetch(base+'/report')).status,401);
+assert.equal((await fetch(base+'/report?from=2026-99-01',{headers:{Authorization:`Bearer ${token}`}})).status,400);
+assert.equal((await post({...input,source:'evil@example.com'})).status,400);
+assert.equal((await post({...input,url:'https://private/?email=private'})).status,400);
+assert.equal((await post({...input,page:'invalid'})).status,400);
+assert.equal((await post({...input,event:'store_click',cta:'DROP TABLE daily'})).status,400);
+assert.equal((await post(input,{Origin:'https://evil.example'})).status,403);
+assert.equal((await post('x'.repeat(513))).status,413);
+const script=await readFile(new URL('../../wolse-escape/en/metrics.js',import.meta.url),'utf8');
+function runClient(query,referrer='',beacon=true,legacy=false) {
+ const bodies=[],listeners={},elements={};
+ const context={window:{},location:{search:query,hostname:'play-fold.net'},document:{referrer,visibilityState:'visible',addEventListener:(name,fn)=>listeners[name]=fn,querySelectorAll:()=>['hero_us','hero_gb','bottom_us','bottom_gb'].map(cta=>({dataset:{storeCta:cta},addEventListener:(event,fn)=>elements[cta+':'+event]=fn}))},navigator:{sendBeacon:(url,body)=>{if(beacon)bodies.push(body);return beacon}},crypto:{...(legacy?{}:{randomUUID}),getRandomValues:values=>webcrypto.getRandomValues(values)},Uint8Array,URL,URLSearchParams,Blob,fetch:(url,opts)=>{bodies.push(new Blob([opts.body]));assert.equal(opts.credentials,'omit');assert.equal(opts.referrerPolicy,'no-referrer');return Promise.resolve()},Set};
+ vm.runInNewContext(script,context);
+ return {bodies,context,elements,listeners};
+}
+const paid='?utm_source=instagram&utm_medium=paid_social&utm_campaign=wolse_us_uk_20261124&utm_content=rank_v3_20261127&email=never-send&metrics_test=1';
+const client=runClient(paid,'https://private.example/secret?name=never-send');
+client.elements['hero_us:click']({preventDefault:()=>{throw Error('navigation blocked')}});
+client.elements['hero_us:click']({});client.listeners.visibilitychange();vm.runInNewContext(script,client.context);
+assert.equal(client.bodies.length,2);
+for(const blob of client.bodies){const text=await blob.text();assert.ok(!text.includes('never-send'));assert.ok(!text.includes('private.example'));const payload=JSON.parse(text);assert.equal(payload.source,'instagram_paid_rank_v3');assert.equal(payload.qa,true);}
+const cases=[['','', 'direct'],['','https://l.instagram.com/?secret=1','instagram_organic'],['','https://instagram.com.evil.example/','other'],['?utm_content=unrecognized','', 'other'],['','https://m.facebook.com/','facebook_organic']];
+for(const[q,ref,expected]of cases){const c=runClient(q,ref,false);assert.equal(JSON.parse(await c.bodies[0].text()).source,expected);}
+const legacy=runClient('','',true,true);assert.match(JSON.parse(await legacy.bodies[0].text()).page,/^[0-9a-f-]{36}$/);
+console.log(JSON.stringify({passed:true,server:'persistent visit/click dedupe, recovered visit, QA isolation, private report, input/origin/size bounds',client:'exact source allowlist, raw query/referrer exclusion, one visit, one click per CTA, repeated script protection, fallback, no preventDefault',qaDelta:{visits:3,clickedVisits:2,heroUs:1,bottomGb:1,bottomUs:1},prodUnchanged:true},null,2));
